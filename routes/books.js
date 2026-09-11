@@ -1,18 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const joi = require("joi");
-
-
-const books = [
-    {
-        id: 1,
-        title: "Book 1",
-        author: "Author 1",
-        description: "Description 1",
-        price: 10.99,
-        coverImage: "https://via.placeholder.com/150",
-    },
-];
+const asyncHandler = require("express-async-handler");
+const {Book, validateCreateBook, validateUpdateBook } = require("../models/Book");
 
 
 /** 
@@ -21,9 +10,10 @@ const books = [
 * @method GET
 * @access Public
 **/
-router.get("/", (req, res) => {
+router.get("/", asyncHandler(async (req, res) => {
+    const books = await Book.find().populate("author",["_id","firstName","lastName"]);
     res.status(200).json(books);
-});
+}));
 
 
 /** 
@@ -32,11 +22,11 @@ router.get("/", (req, res) => {
 * @method GET
 * @access Public
 **/
-router.get("/:id", (req, res) => {
-    const book = books.find((b) => b.id === parseInt(req.params.id));
+router.get("/:id", asyncHandler(async (req, res) => {
+    const book = await Book.findById(req.params.id).populate("author",["_id","firstName","lastName"]);
     if (!book) return res.status(404).json({ message: 'Book not found' });
     res.status(200).json(book);
-});
+}));
 
 /** 
 * @desc Create a new book
@@ -44,23 +34,22 @@ router.get("/:id", (req, res) => {
 * @method POST
 * @access Public
 **/
-router.post("/", (req, res) => {
+router.post("/", asyncHandler(async (req, res) => {
     const { error } = validateCreateBook(req.body);
     if (error) {
         return res.status(400).json({ message: error.details[0].message });
     }
 
-    const book = {
-        id: books.length + 1,
+    const book = new Book({
         title: req.body.title,
         author: req.body.author,
         description: req.body.description,
         price: req.body.price,
         coverImage: req.body.coverImage,
-    };
-    books.push(book);
-    res.status(201).json(book);
-});
+    });
+    const result = await book.save();
+    res.status(201).json(result);
+}));
 
 
 /** 
@@ -69,23 +58,15 @@ router.post("/", (req, res) => {
 * @method PUT
 * @access Public
 **/
-router.put("/:id", (req, res) => {
-    const book = books.find((b) => b.id === parseInt(req.params.id));
-    if (!book) return res.status(404).json({ message: 'Book not found' });
-
+router.put("/:id", asyncHandler(async (req, res) => {
     const { error } = validateUpdateBook(req.body);
     if (error) {
         return res.status(400).json({ message: error.details[0].message });
     }
+    const updatedBook = await Book.findByIdAndUpdate(req.params.id, req.body, { returnDocument: "after" });
 
-    book.title = req.body.title;
-    book.author = req.body.author;
-    book.description = req.body.description;
-    book.price = req.body.price;
-    book.coverImage = req.body.coverImage;
-
-    res.status(200).json(book);
-});
+    res.status(200).json(updatedBook);
+}));
 
 /** 
 * @desc Delete a book by ID
@@ -93,35 +74,14 @@ router.put("/:id", (req, res) => {
 * @method DELETE
 * @access Public
 **/
-router.delete("/:id", (req, res) => {
-    const bookIndex = books.findIndex((b) => b.id === parseInt(req.params.id));
-    if (bookIndex === -1) return res.status(404).json({ message: 'Book not found' });
-    books.splice(bookIndex, 1);
+
+router.delete("/:id", asyncHandler(async (req, res) => {
+    const book = await Book.findByIdAndDelete(req.params.id);
+    if (!book) return res.status(404).json({ message: 'Book not found' });
     res.status(200).json({ message: 'Book deleted' });
-});
+}));
 
-//validation function
-function validateCreateBook(book) {
-    const schema = joi.object({
-        title: joi.string().trim().min(3).required(),
-        author: joi.string().trim().min(2).max(100).required(),
-        description: joi.string().trim().min(10).max(500).required(),
-        price: joi.number().min(0).required(),
-        coverImage: joi.string().uri().required(),
-    });
 
-    return schema.validate(book);
-} 
-function validateUpdateBook(book) {
-    const schema = joi.object({
-        title: joi.string().trim().min(3).optional(),
-        author: joi.string().trim().min(2).max(100).optional(),
-        description: joi.string().trim().min(10).max(500).optional(),
-        price: joi.number().min(0).optional(),
-        coverImage: joi.string().uri().optional(),
-    });
 
-    return schema.validate(book);
-}
 
 module.exports = router;
