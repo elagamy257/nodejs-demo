@@ -6,6 +6,7 @@ const booksRouter = require("./routes/books");
 const authorsRouter = require("./routes/author");
 const mongoose = require("mongoose");
 const logger = require("./middlewares/logger");
+const {errorHandel , notFound} =require("./middlewares/errors")
 const dotenv = require("dotenv");
 dotenv.config();
 
@@ -26,8 +27,12 @@ app.get("/", (req, res) => {
 });
 
 //routes
-app.use("/api/books",booksRouter);
+app.use("/api/books", booksRouter);
 app.use("/api/authors", authorsRouter);
+
+//error handling middleware
+app.use(notFound);
+app.use(errorHandel);
 
 //run server
 app.listen(port, () => {
