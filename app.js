@@ -3,7 +3,13 @@ const express = require("express");
 const app = express();
 const port = 5000;
 const booksRouter = require("./routes/books");
-const authorsRouter = require("./routes/auther");
+const authorsRouter = require("./routes/author");
+const mongoose = require("mongoose");
+
+//conn to db
+mongoose.connect("mongodb://localhost/bookStoreDB")
+    .then(() => console.log("Connected to MongoDB"))
+    .catch((err) => console.error("Could not connect to MongoDB", err));
 
 //middleware
 app.use(express.json());
