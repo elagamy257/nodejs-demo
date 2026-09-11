@@ -1,25 +1,26 @@
 const mongoose = require("mongoose")
+const joi = require("joi");
 
 const AuthorSchema = new mongoose.Schema({
   firstName: {
     type: String,
     required: true,
     trim: true,
-    minlength: 2,
+    minlength: 3,
     maxlength: 50
   },
   lastName: {
     type: String,
     required: true,
     trim: true,
-    minlength: 2,
+    minlength: 3,
     maxlength: 50
   },
   nationality: {
     type: String,
     required: true,
     trim: true,
-    minlength: 2,
+    minlength: 3,
     maxlength: 50
   },
   birthDate: {
@@ -36,4 +37,33 @@ const AuthorSchema = new mongoose.Schema({
 
 const Author = mongoose.model("Author", AuthorSchema);
 
-module.exports = Author;
+
+// validate author
+function validateCreateAuthor(author) {
+  const schema = joi.object({
+    firstName: joi.string().min(3).required(),
+    lastName: joi.string().min(3).required(),
+    nationality: joi.string().min(3).required(),
+    birthDate: joi.date().required(),
+    image: joi.string().uri().required()
+  });
+  return schema.validate(author);
+}
+
+function validateUpdateAuthor(author) {
+  const schema = joi.object({
+    firstName: joi.string().min(3),
+    lastName: joi.string().min(3),
+    nationality: joi.string().min(3),
+    birthDate: joi.date(),
+    image: joi.string().uri()
+  });
+  return schema.validate(author);
+}
+
+
+module.exports = {
+  Author,
+  validateCreateAuthor,
+  validateUpdateAuthor
+};
