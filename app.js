@@ -1,10 +1,11 @@
 const express = require("express");
 //init app
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 5000;
 const booksRouter = require("./routes/books");
 const authorsRouter = require("./routes/author");
 const mongoose = require("mongoose");
+const logger = require("./middlewares/logger");
 const dotenv = require("dotenv");
 dotenv.config();
 
@@ -16,6 +17,8 @@ mongoose
 
 //middleware
 app.use(express.json());
+
+app.use(logger);
 
 //http methods
 app.get("/", (req, res) => {
