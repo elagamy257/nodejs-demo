@@ -8,6 +8,7 @@ const {
   validateUpdateUser,
 } = require("../models/User");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 /**
  * @desc Register new user
@@ -37,8 +38,10 @@ router.post(
     });
 
     const result = await user.save();
-    const token = null;
-    const { password, ...other } = result._doc;
+    const token = jwt.sign(
+      { id: user._id, isAdmin: user.isAdmin },
+      process.env.JWT_SECERT_KEY,
+    );
     res.status(201).json({ ...other, token });
   }),
 );
@@ -71,7 +74,10 @@ router.post(
       return res.status(400).json({ message: "invalid email or password" });
     }
 
-    const token = null;
+    const token = jwt.sign(
+      { id: user._id, isAdmin: user.isAdmin },
+      process.env.JWT_SECERT_KEY,
+    );
     const { password, ...other } = user._doc;
     res.status(200).json({ ...other, token });
   }),
