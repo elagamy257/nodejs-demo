@@ -33,12 +33,12 @@ router.post("/", asyncHandler(async (req, res) => {
 
 // Update a author by ID
 router.put("/:id", asyncHandler(async (req, res) => { 
-    const author = await Author.findByIdAndUpdate(req.params.id, req.body, { returnDocument: "after" });
-    if (!author) return res.status(404).json({ message: 'Author not found' });
     const { error } = validateUpdateAuthor(req.body);
     if (error) {
       return res.status(400).json({ message: error.details[0].message });
     }
+    const author = await Author.findByIdAndUpdate(req.params.id, req.body, { returnDocument: "after" });
+    if (!author) return res.status(404).json({ message: 'Author not found' });
     res.status(200).json(author);
 }));
 
