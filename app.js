@@ -5,6 +5,7 @@ const port = process.env.PORT || 5000;
 const booksRouter = require("./routes/books");
 const authorsRouter = require("./routes/author");
 const authRouter = require("./routes/auth");
+const usersRouter = require("./routes/users");
 const mongoose = require("mongoose");
 const logger = require("./middlewares/logger");
 const {errorHandel , notFound} =require("./middlewares/errors")
@@ -31,6 +32,7 @@ app.get("/", (req, res) => {
 app.use("/api/books", booksRouter);
 app.use("/api/authors", authorsRouter);
 app.use("/api/auth", authRouter);
+app.use("/api/users", usersRouter);
 
 //error handling middleware
 app.use(notFound);
