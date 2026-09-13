@@ -33,7 +33,6 @@ router.post(
       email: req.body.email,
       password: req.body.password,
       username: req.body.username,
-      isAdmin: req.body.isAdmin,
     });
 
     const result = await user.save();
@@ -41,6 +40,7 @@ router.post(
       { id: user._id, isAdmin: user.isAdmin },
       process.env.JWT_SECERT_KEY,
     );
+    const { password, ...other } = result._doc;
     res.status(201).json({ ...other, token });
   }),
 );
