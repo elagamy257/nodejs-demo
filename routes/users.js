@@ -72,4 +72,43 @@ router.get(
   }),
 );
 
+/**
+ * @desc Get  User by id
+ * @route get /api/users/:id
+ * @method get
+ * @access private (only admin & user himself)
+ **/
+router.get(
+  "/:id",
+  verifyTokenAndAuthorization,
+  asyncHandler(async (req, res) => {
+    const user = await User.findById(req.params.id).select("-password")
+    if(user){
+      res.status(200).json(user);
+    }else {
+      res.status(404).json({message :" user not found"});
+    }
+  }),
+);
+
+/**
+ * @desc delete  User by id
+ * @route delete /api/users/:id
+ * @method delete
+ * @access private (only admin & user himself)
+ **/
+router.delete(
+  "/:id",
+  verifyTokenAndAuthorization,
+  asyncHandler(async (req, res) => {
+    const user = await User.findById(req.params.id).select("-password")
+    if(user){
+      await User.findByIdAndDelete(req.params.id)
+      res.status(200).json({message :" user has been deleted successflly"});
+    }else {
+      res.status(404).json({message :" user not found"});
+    }
+  }),
+);
+
 module.exports = router;
