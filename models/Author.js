@@ -45,7 +45,7 @@ function validateCreateAuthor(author) {
     lastName: joi.string().min(3).required(),
     nationality: joi.string().min(3).required(),
     birthDate: joi.date().required(),
-    image: joi.string().uri().required()
+    image: joi.string().uri()
   });
   return schema.validate(author);
 }
