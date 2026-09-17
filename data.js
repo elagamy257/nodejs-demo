@@ -48,21 +48,25 @@ const authors = [
     firstName: "Robert",
     lastName: "Kiyosaki",
     nationality: "USA",
+    birthDate: "9-10-2000"
   },
   {
     firstName: "Paulo",
     lastName: "Coelho",
     nationality: "Brazil",
+    birthDate: "9-10-2000"
   },
   {
     firstName: "Wayne",
     lastName: "Dyer",
     nationality: "USA",
+    birthDate: "9-10-2000"
   },
   {
     firstName: "Rolf",
     lastName: "Dobelli",
     nationality: "Switzerland",
+    birthDate: "9-10-2000"
   },
 ];
 
