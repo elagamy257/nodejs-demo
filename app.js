@@ -20,11 +20,14 @@ app.get("/", (req, res) => {
     res.send("hello world");
 });
 
+app.set('view engine', 'ejs');
+
 //routes
 app.use("/api/books", require("./routes/books"));
 app.use("/api/authors", require("./routes/author"));
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/users", require("./routes/users"));
+app.use("/password", require("./routes/password"));
 
 //error handling middleware
 app.use(notFound);
