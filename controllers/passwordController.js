@@ -3,6 +3,7 @@ const { User } = require("../models/User");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const joi = require("joi");
+const nodemailer = require("nodemailer");
 
 /**
  * @desc Get Forget password view
@@ -31,7 +32,38 @@ module.exports.sendForgotPasswordView = asyncHandler(async (req, res) => {
   });
 
   const link = `http://localhost:5000/password/reset-password/${user.id}/${token}`;
-  return res.json({ message: "Click on the link", resetPasswordLink: link });
+
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.USER_EMAIL,
+      pass: process.env.USER_PASS,
+    },
+  });
+
+  const mailOptions = {
+    from: process.env.USER_EMAIL,
+    to: user.email,
+    subject: "reset password",
+    html: `<div>
+              <h4>click on the link below to reset your password</h4>
+              <a href="${link}">Click here to reset your password</a>
+          </div>`,
+  };
+
+  console.log("==========================================");
+  console.log("Reset Password Link:", link);
+  console.log("==========================================");
+
+  transporter.sendMail(mailOptions, function (error, success) {
+    if (error) {
+      console.log(error);
+    } else {
+      console.log("email sent: " + success.response);
+    }
+  });
+
+  res.render("link-send");
 });
 
 /**
