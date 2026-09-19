@@ -3,7 +3,9 @@ const logger = require("./middlewares/logger");
 const { errorHandel, notFound } = require("./middlewares/errors");
 require("dotenv").config();
 const connectToDB = require("./config/db");
-const path = require("path")
+const path = require("path");
+const helmet = require("helmet");
+const cors = require("cors");
 
 //init app
 const app = express();
@@ -25,6 +27,13 @@ app.get("/", (req, res) => {
   res.send("hello world");
 });
 
+// helmet
+app.set(helmet());
+
+// cors policy
+app.set(cors());
+
+// set view engine
 app.set("view engine", "ejs");
 
 //routes
