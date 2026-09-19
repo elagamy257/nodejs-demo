@@ -2,7 +2,6 @@ const asyncHandler = require("express-async-handler");
 const { User, validateChangePassword } = require("../models/User");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
-const joi = require("joi");
 const nodemailer = require("nodemailer");
 
 /**
@@ -26,7 +25,9 @@ module.exports.sendForgotPasswordView = asyncHandler(async (req, res) => {
   if (!user) {
     return res.status(404).json({ message: "user not found" });
   }
-  const secret = process.env.JWT_SECERT_KEY + user.password;
+
+  const jwtSecret = process.env.JWT_SECRET || process.env.JWT_SECERT_KEY;
+  const secret = jwtSecret + user.password;
   const token = jwt.sign({ email: user.email, id: user.id }, secret, {
     expiresIn: "10m",
   });
@@ -44,10 +45,10 @@ module.exports.sendForgotPasswordView = asyncHandler(async (req, res) => {
   const mailOptions = {
     from: process.env.USER_EMAIL,
     to: user.email,
-    subject: "reset password",
+    subject: "Reset Password",
     html: `<div>
-              <h4>click on the link below to reset your password</h4>
-              <a href="${link}">Click here to reset your password</a>
+              <h4>Click on the link below to reset your password:</h4>
+              <a href="${link}">Reset Password Link</a>
           </div>`,
   };
 
@@ -55,15 +56,13 @@ module.exports.sendForgotPasswordView = asyncHandler(async (req, res) => {
   console.log("Reset Password Link:", link);
   console.log("==========================================");
 
-  transporter.sendMail(mailOptions, function (error, success) {
-    if (error) {
-      console.log(error);
-      res.status(500).json({ message: "something went wrong" });
-    } else {
-      console.log("email sent: " + success.response);
-      res.render("link-send");
-    }
-  });
+  try {
+    await transporter.sendMail(mailOptions);
+    res.render("link-send");
+  } catch (error) {
+    console.error("Email send failure:", error.message);
+    res.status(500).json({ message: "Failed to send email. Please try again later." });
+  }
 });
 
 /**
@@ -77,12 +76,14 @@ module.exports.getResetPasswordView = asyncHandler(async (req, res) => {
   if (!user) {
     return res.status(404).json({ message: "user not found" });
   }
-  const secret = process.env.JWT_SECERT_KEY + user.password;
+
+  const jwtSecret = process.env.JWT_SECRET || process.env.JWT_SECERT_KEY;
+  const secret = jwtSecret + user.password;
   try {
     jwt.verify(req.params.token, secret);
     res.render("reset-password", { email: user.email });
   } catch (error) {
-    console.log(error);
+    console.error("Invalid or expired token:", error.message);
     res.status(400).json({ message: "invalid link or expired token" });
   }
 });
@@ -103,19 +104,20 @@ module.exports.resetThePassword = asyncHandler(async (req, res) => {
   if (!user) {
     return res.status(404).json({ message: "user not found" });
   }
-  const secret = process.env.JWT_SECERT_KEY + user.password;
+
+  const jwtSecret = process.env.JWT_SECRET || process.env.JWT_SECERT_KEY;
+  const secret = jwtSecret + user.password;
   try {
     jwt.verify(req.params.token, secret);
 
     const salt = await bcrypt.genSalt(10);
-    req.body.password = await bcrypt.hash(req.body.password, salt);
+    user.password = await bcrypt.hash(req.body.password, salt);
 
-    user.password = req.body.password;
     await user.save();
 
     res.render("success-password");
   } catch (error) {
-    console.log(error);
+    console.error("Password reset failure:", error.message);
     res.status(400).json({ message: "invalid link or expired token" });
   }
 });

@@ -3,7 +3,7 @@ const joi = require("joi");
 const passwordComplexity = require("joi-password-complexity");
 const jwt = require("jsonwebtoken");
 
-//user schema
+// user schema
 const UserSchema = new mongoose.Schema(
   {
     email: {
@@ -38,16 +38,17 @@ const UserSchema = new mongoose.Schema(
 
 // Generate Token
 UserSchema.methods.generateToken = function () {
+  const secret = process.env.JWT_SECRET || process.env.JWT_SECERT_KEY;
   return jwt.sign(
     { id: this._id, isAdmin: this.isAdmin },
-    process.env.JWT_SECERT_KEY,
+    secret,
   );
 };
 
-//user model
+// user model
 const User = mongoose.model("user", UserSchema);
 
-//valid functions
+// validation functions
 function validateRegisterUser(obj) {
   const schema = joi.object({
     email: joi.string().trim().min(5).max(100).required().email(),
@@ -56,6 +57,7 @@ function validateRegisterUser(obj) {
   });
   return schema.validate(obj);
 }
+
 function validateLoginUser(obj) {
   const schema = joi.object({
     email: joi.string().trim().min(5).max(100).required().email(),
@@ -63,12 +65,14 @@ function validateLoginUser(obj) {
   });
   return schema.validate(obj);
 }
+
 function validateChangePassword(obj) {
   const schema = joi.object({
     password: joi.string().trim().min(8).required(),
   });
   return schema.validate(obj);
 }
+
 function validateUpdateUser(obj) {
   const schema = joi.object({
     email: joi.string().trim().min(5).max(100).email(),

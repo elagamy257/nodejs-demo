@@ -8,41 +8,44 @@ const bcrypt = require("bcryptjs");
 
 /**
  * @desc Register new user
- * @route post /api/auth/register
- * @method post
+ * @route POST /api/auth/register
+ * @method POST
  * @access Public
  **/
-
 module.exports.register = asyncHandler(async (req, res) => {
   const { error } = validateRegisterUser(req.body);
   if (error) {
     return res.status(400).json({ message: error.details[0].message });
   }
+
   let user = await User.findOne({ email: req.body.email });
   if (user) {
-    return res.status(400).json({ message: "this user already registred" });
+    return res.status(400).json({ message: "this user already registered" });
   }
+
   const salt = await bcrypt.genSalt(10);
-  req.body.password = await bcrypt.hash(req.body.password, salt);
+  const hashedPassword = await bcrypt.hash(req.body.password, salt);
+
   user = new User({
     email: req.body.email,
-    password: req.body.password,
+    password: hashedPassword,
     username: req.body.username,
   });
 
   const result = await user.save();
-  const token = user.generateToken();
-  const { password, ...other } = result._doc;
-  res.status(201).json({ ...other, token });
+  const token = result.generateToken();
+  const userObj = result.toObject();
+  delete userObj.password;
+
+  res.status(201).json({ ...userObj, token });
 });
 
 /**
- * @desc login new user
- * @route post /api/auth/login
- * @method post
+ * @desc Login user
+ * @route POST /api/auth/login
+ * @method POST
  * @access Public
  **/
-
 module.exports.login = asyncHandler(async (req, res) => {
   const { error } = validateLoginUser(req.body);
   if (error) {
@@ -63,6 +66,8 @@ module.exports.login = asyncHandler(async (req, res) => {
   }
 
   const token = user.generateToken();
-  const { password, ...other } = user._doc;
-  res.status(200).json({ ...other, token });
+  const userObj = user.toObject();
+  delete userObj.password;
+
+  res.status(200).json({ ...userObj, token });
 });
