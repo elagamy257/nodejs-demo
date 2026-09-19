@@ -6,6 +6,7 @@ const connectToDB = require("./config/db");
 const path = require("path");
 const helmet = require("helmet");
 const cors = require("cors");
+const compression = require("compression");
 
 // init app
 const app = express();
@@ -17,6 +18,7 @@ connectToDB();
 // security middleware
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(cors());
+app.use(compression());
 
 // middleware parsing
 app.use(express.json());

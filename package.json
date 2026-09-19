@@ -6,11 +6,13 @@
   "author": "elagamy",
   "type": "commonjs",
   "main": "app.js",
-  "scripts": {
-    "start": "nodemon app"
-  },
+ "scripts": {
+  "start": "node app.js",
+  "dev": "nodemon app"
+},
   "dependencies": {
     "bcryptjs": "^3.0.3",
+    "compression": "^1.8.2",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "ejs": "^6.0.1",
@@ -22,7 +24,9 @@
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.10.0",
     "multer": "^2.4.0",
-    "nodemailer": "^10.0.10"
+    "nodemailer": "^10.0.10",
+    "swagger-jsdoc": "^6.3.0",
+    "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
