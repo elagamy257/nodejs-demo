@@ -28,6 +28,32 @@ const upload = multer({
   limits: { fileSize: 1024 * 1024 * 2 }, // 2MB Limit
 });
 
+/**
+ * @swagger
+ * /api/upload:
+ *   post:
+ *     summary: Upload an image file
+ *     tags: [Upload]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - image
+ *             properties:
+ *               image:
+ *                 type: string
+ *                 format: binary
+ *                 description: Image file to upload (JPEG, PNG, etc.)
+ *     responses:
+ *       200:
+ *         description: Image uploaded successfully
+ *       400:
+ *         description: Invalid file or missing image field
+ */
+
 // /api/upload
 router.post("/", upload.single("image"), (req, res) => {
   if (!req.file) {

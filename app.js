@@ -50,8 +50,18 @@ const swaggerOptions = {
         description: "Server URL",
       },
     ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+          description: "Enter your JWT token in the format: Bearer <token>",
+        },
+      },
+    },
   },
-  apis: [path.join(__dirname, "routes/*.js")],
+  apis: ["./routes/*.js", path.join(__dirname, "routes/*.js")],
 };
 
 const swaggerSpec = swaggerJsDoc(swaggerOptions);
