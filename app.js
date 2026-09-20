@@ -8,6 +8,9 @@ const helmet = require("helmet");
 const cors = require("cors");
 const compression = require("compression");
 
+const swaggerUi = require("swagger-ui-express");
+const swaggerJsDoc = require("swagger-jsdoc");
+
 // init app
 const app = express();
 const port = process.env.PORT || 5000;
@@ -32,10 +35,31 @@ app.use(express.static(path.join(__dirname, "images")));
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
-// root endpoint
-app.get("/", (req, res) => {
-  res.send("hello world");
-});
+// swagger setup
+const swaggerOptions = {
+  definition: {
+    openapi: "3.0.0",
+    info: {
+      title: "Bookstore API",
+      version: "1.0.0",
+      description: "Node.js Bookstore API Documentation",
+    },
+    servers: [
+      {
+        url: "/",
+        description: "Server URL",
+      },
+    ],
+  },
+  apis: [path.join(__dirname, "routes/*.js")],
+};
+
+const swaggerSpec = swaggerJsDoc(swaggerOptions);
+
+// Swagger UI routes
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.get("/", swaggerUi.setup(swaggerSpec));
+app.use(swaggerUi.serveFiles(swaggerSpec));
 
 // routes
 app.use("/api/books", require("./routes/books"));
@@ -67,4 +91,3 @@ if (require.main === module) {
 }
 
 module.exports = app;
-
