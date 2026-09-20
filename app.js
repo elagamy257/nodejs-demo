@@ -68,8 +68,9 @@ const swaggerSpec = swaggerJsDoc(swaggerOptions);
 
 // Swagger UI routes
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-app.get("/", swaggerUi.setup(swaggerSpec));
-app.use(swaggerUi.serveFiles(swaggerSpec));
+app.get("/", (req, res) => {
+  res.redirect("/api-docs");
+});
 
 // routes
 app.use("/api/books", require("./routes/books"));
