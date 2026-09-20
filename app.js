@@ -30,6 +30,7 @@ app.use(express.static(path.join(__dirname, "images")));
 
 // set view engine
 app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
 
 // root endpoint
 app.get("/", (req, res) => {
@@ -48,17 +49,22 @@ app.use("/password", require("./routes/password"));
 app.use(notFound);
 app.use(errorHandler || errorHandel);
 
-// run server
-const server = app.listen(port, () => {
-  console.log(
-    `Server is running in ${process.env.NODE_ENV || "development"} mode on port ${port}`,
-  );
-});
-
-// handle unhandled promise rejections
-process.on("unhandledRejection", (err) => {
-  console.error(`Unhandled Rejection Error: ${err.message}`);
-  server.close(() => {
-    process.exit(1);
+// run server locally
+if (require.main === module) {
+  const server = app.listen(port, () => {
+    console.log(
+      `Server is running in ${process.env.NODE_ENV || "development"} mode on port ${port}`,
+    );
   });
-});
+
+  // handle unhandled promise rejections
+  process.on("unhandledRejection", (err) => {
+    console.error(`Unhandled Rejection Error: ${err.message}`);
+    server.close(() => {
+      process.exit(1);
+    });
+  });
+}
+
+module.exports = app;
+
